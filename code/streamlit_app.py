@@ -48,70 +48,75 @@ if uploaded_file:
     label_samples = df[df['target'] == selected_label]['text'].sample(num_samples)
     st.write(label_samples)
 
-# 데이터 디렉터리 설정
-BASE_DIR = os.getcwd()
-DATA_DIR = os.path.join(BASE_DIR, 'data')
 
 # Streamlit 설정
 st.header("Classified Output Visualization")
 
-# classified_output.csv 파일 경로
-csv_file_path = os.path.join(DATA_DIR, 'classified_output_zero_shot_numeric.csv')
+# # 데이터 디렉터리 설정
+# BASE_DIR = os.getcwd()
+# DATA_DIR = os.path.join(BASE_DIR, 'data')
 
-# Read csv file
-try:
-    df = pd.read_csv(csv_file_path)
-except FileNotFoundError:
-    st.error("파일을 찾을 수 없습니다.")
-    st.stop()
+# # classified_output.csv 파일 경로
+# csv_file_path = os.path.join(DATA_DIR, 'classified_output_zero_shot_numeric.csv')
 
-# 데이터 미리보기
-st.write("### 데이터 미리보기")
-st.write(df.head())
+# # Read csv file
+# try:
+#     df = pd.read_csv(csv_file_path)
+# except FileNotFoundError:
+#     st.error("파일을 찾을 수 없습니다.")
+#     st.stop()
 
-# 데이터 기본 정보 표시
-st.write("### 데이터 정보")
-st.write(df.describe(include='all'))
+classified_output = st.file_uploader("라벨 수정한 CSV 파일 업로드", type="csv")
 
-# Null 값 확인
-st.write("### Null 값 확인")
-st.write(df.isnull().sum())
+if classified_output:
+    df = pd.read_csv(classified_output)
+    # 데이터 미리보기
+    st.write("### 데이터 미리보기")
+    st.write(df.head())
 
-# 타겟 라벨 정의
-labels = {
-    0: "생활문화",
-    1: "스포츠",
-    2: "세계",
-    3: "정치",
-    4: "경제",
-    5: "IT과학",
-    6: "사회"
-}
+    # 데이터 기본 정보 표시
+    st.write("### 데이터 정보")
+    st.write(df.describe(include='all'))
 
-# target과 predicted_target이 같은 경우
-st.write("### Target과 Predicted Target이 같은 경우")
-correct_predictions = df[df['target'] == df['predicted_target']]
-num_correct = len(correct_predictions)
+    # Null 값 확인
+    st.write("### Null 값 확인")
+    st.write(df.isnull().sum())
 
-if num_correct > 0:
-    st.write(f"개수: {num_correct}")
-    st.write(correct_predictions[['text', 'target', 'predicted_target']].head(20).assign(
-        target=correct_predictions['target'].map(labels),
-        predicted_target=correct_predictions['predicted_target'].map(labels)
-    ))
-else:
-    st.write("일치하는 데이터가 없습니다.")
+    # 타겟 라벨 정의
+    labels = {
+        0: "생활문화",
+        1: "스포츠",
+        2: "세계",
+        3: "정치",
+        4: "경제",
+        5: "IT과학",
+        6: "사회"
+    }
 
-# target과 predicted_target이 다른 경우
-st.write("### Target과 Predicted Target이 다른 경우")
-incorrect_predictions = df[df['target'] != df['predicted_target']]
-num_incorrect = len(incorrect_predictions)
+    # target과 predicted_target이 같은 경우
+    st.write("### Target과 Predicted Target이 같은 경우")
+    correct_predictions = df[df['target'] == df['predicted_target']]
+    num_correct = len(correct_predictions)
 
-if num_incorrect > 0:
-    st.write(f"개수: {num_incorrect}")
-    st.write(incorrect_predictions[['text', 'target', 'predicted_target']].head(20).assign(
-        target=incorrect_predictions['target'].map(labels),
-        predicted_target=incorrect_predictions['predicted_target'].map(labels)
-    ))
-else:
-    st.write("불일치하는 데이터가 없습니다.")
+    if num_correct > 0:
+        st.write(f"개수: {num_correct}")
+        st.write(correct_predictions[['text', 'target', 'predicted_target']].head(20).assign(
+            target=correct_predictions['target'].map(labels),
+            predicted_target=correct_predictions['predicted_target'].map(labels)
+        ))
+    else:
+        st.write("일치하는 데이터가 없습니다.")
+
+    # target과 predicted_target이 다른 경우
+    st.write("### Target과 Predicted Target이 다른 경우")
+    incorrect_predictions = df[df['target'] != df['predicted_target']]
+    num_incorrect = len(incorrect_predictions)
+
+    if num_incorrect > 0:
+        st.write(f"개수: {num_incorrect}")
+        st.write(incorrect_predictions[['text', 'target', 'predicted_target']].head(20).assign(
+            target=incorrect_predictions['target'].map(labels),
+            predicted_target=incorrect_predictions['predicted_target'].map(labels)
+        ))
+    else:
+        st.write("불일치하는 데이터가 없습니다.")
