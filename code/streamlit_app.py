@@ -93,6 +93,19 @@ if classified_output:
         6: "사회"
     }
 
+    # 클래스 분포 시각화
+    st.write("### Target과 Predicted Target 클래스 분포 비교")
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    sns.countplot(data=df, x='target', color='skyblue', label='Target', alpha=0.6, ax=ax)
+    sns.countplot(data=df, x='predicted_target', color='salmon', label='Predicted Target', alpha=0.6, ax=ax)
+
+    plt.title("Target vs Predicted Target Distribution")
+    plt.xlabel("Class")
+    plt.ylabel("Count")
+    plt.legend()
+    st.pyplot(fig)
+
     # target과 predicted_target이 같은 경우
     st.write("### Target과 Predicted Target이 같은 경우")
     correct_predictions = df[df['target'] == df['predicted_target']]
