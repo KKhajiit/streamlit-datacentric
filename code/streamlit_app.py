@@ -4,6 +4,17 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+# 타겟 라벨 정의
+labels = {
+    0: "생활문화",
+    1: "스포츠",
+    2: "정치",
+    3: "사회",
+    4: "IT_과학",
+    5: "경제",
+    6: "국제"
+}
+
 st.title("Korean News Headline EDA")
 
 uploaded_file = st.file_uploader("CSV 파일 업로드", type="csv")
@@ -43,8 +54,17 @@ if uploaded_file:
     st.write(df[['text', 'target']].sample(num_samples))
 
     # 특정 라벨에 따른 텍스트 샘플 확인
+    # 라벨 선택박스에 표시할 라벨과 숫자 리스트 생성
+    label_options = [f"{labels[label]}({label})" for label in sorted(df['target'].unique())]
+
     st.write("### 특정 라벨의 텍스트 샘플")
-    selected_label = st.selectbox("라벨 선택", sorted(df['target'].unique()))
+
+    # 선택된 라벨 표시와 데이터 필터링을 위해 label_options의 인덱스를 활용
+    selected_label_option = st.selectbox("라벨 선택", label_options)
+    selected_label = int(selected_label_option.split('(')[-1][0])  # 선택한 라벨 숫자만 추출
+
+    # 샘플 텍스트 출력
+    num_samples = 20  # 원하는 샘플 수
     label_samples = df[df['target'] == selected_label]['text'].sample(num_samples)
     st.write(label_samples)
 
@@ -81,17 +101,6 @@ if classified_output:
     # Null 값 확인
     st.write("### Null 값 확인")
     st.write(df.isnull().sum())
-
-    # 타겟 라벨 정의
-    labels = {
-        0: "생활문화",
-        1: "스포츠",
-        2: "정치",
-        3: "사회",
-        4: "IT_과학",
-        5: "경제",
-        6: "국제"
-    }
 
     # 클래스 분포 시각화
     st.write("### Target과 Predicted Target 클래스 분포 비교")
