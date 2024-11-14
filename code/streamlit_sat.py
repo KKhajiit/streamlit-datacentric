@@ -82,10 +82,10 @@ def main():
         st.write("### Additional Statistics")
 
         # Plot length distributions for each field
-        plot_length_distribution(data, 'paragraph', 'Paragraph')
-        plot_length_distribution(data, 'problems', 'Question', True, 'question')
-        plot_length_distribution(data, 'problems', 'Choices', True, 'choices')
-        plot_length_distribution(data, 'question_plus', 'Question Plus')
+        plot_length_histogram(data, 'paragraph', 'Paragraph')
+        plot_length_histogram(data, 'problems', 'Question', True, 'question')
+        plot_length_histogram(data, 'problems', 'Choices', True, 'choices')
+        plot_length_histogram(data, 'question_plus', 'Question Plus')
 
         # Answer count analysis
         st.write("#### Answer Distribution")
