@@ -1,1 +1,1 @@
-# streamlit-datacentric
+# streamlit for boostcamp AI Tech
