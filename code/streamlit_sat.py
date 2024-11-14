@@ -28,11 +28,11 @@ def display_problem_details(problem_data):
 
 
 # Function to plot length distribution as a histogram
-def plot_length_histogram(data, column_name, title, isDict = False, dictName = None):
+def plot_length_histogram(data, column_name, title, isDict=False, dictName=None):
     if isDict:
-        lengths = data[column_name].apply(lambda x: ast.literal_eval(x)[dictName])
+        lengths = data[column_name].apply(lambda x: len(str(ast.literal_eval(x).get(dictName, ''))) if pd.notnull(x) else 0)
     else:
-        lengths = data[column_name]
+        lengths = data[column_name].apply(lambda x: len(str(x)) if pd.notnull(x) else 0)
 
     # Plot histogram
     fig, ax = plt.subplots()
