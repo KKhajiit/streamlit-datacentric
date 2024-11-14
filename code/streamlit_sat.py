@@ -83,8 +83,8 @@ def main():
 
         # Plot length distributions for each field
         plot_length_distribution(data, 'paragraph', 'Paragraph')
-        plot_length_distribution(data, 'problems', 'Question', 'question')
-        plot_length_distribution(data, 'problems', 'Choices', 'choices')
+        plot_length_distribution(data, 'problems', 'Question', True, 'question')
+        plot_length_distribution(data, 'problems', 'Choices', True, 'choices')
         plot_length_distribution(data, 'question_plus', 'Question Plus')
 
         # Answer count analysis
