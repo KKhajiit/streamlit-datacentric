@@ -28,14 +28,20 @@ def display_problem_details(problem_data):
     st.write(f"**Answer:** {answer}")
 
 
-# Helper function to calculate and plot length distributions
-def plot_length_distribution(data, column_name, description, is_json=False, json_key=None):
-    if is_json and json_key:
-        lengths = data[column_name].apply(lambda x: len(json.loads(x).get(json_key, '')))
+# Function to plot length distribution as a histogram
+def plot_length_histogram(data, column_name, title, isDict = False, dictName = None):
+    if isDict:
+        lengths = data[column_name].apply(lambda x: ast.literal_eval(x)[dictName])
     else:
-        lengths = data[column_name].apply(len)
-    st.write(f"#### {description} Length Distribution")
-    st.bar_chart(lengths.value_counts().sort_index())
+        lengths = data[column_name]
+
+    # Plot histogram
+    fig, ax = plt.subplots()
+    ax.hist(lengths, bins=20, color='skyblue', edgecolor='black')
+    ax.set_title(f'{title} Length Distribution')
+    ax.set_xlabel('Length')
+    ax.set_ylabel('Frequency')
+    st.pyplot(fig)
 
 
 # Main Streamlit app
@@ -77,13 +83,13 @@ def main():
 
         # Plot length distributions for each field
         plot_length_distribution(data, 'paragraph', 'Paragraph')
-        plot_length_distribution(data, 'problems', 'Question', is_json=True, json_key='question')
-        plot_length_distribution(data, 'problems', 'Choices', is_json=True, json_key='choices')
+        plot_length_distribution(data, 'problems', 'Question', 'question')
+        plot_length_distribution(data, 'problems', 'Choices', 'choices')
         plot_length_distribution(data, 'question_plus', 'Question Plus')
 
         # Answer count analysis
         st.write("#### Answer Distribution")
-        answer_counts = data['problems'].apply(lambda x: json.loads(x)['answer']).value_counts()
+        answer_counts = data['problems'].apply(lambda x: ast.literal_eval(x)['answer']).value_counts()
         st.bar_chart(answer_counts.sort_index())
 
 
