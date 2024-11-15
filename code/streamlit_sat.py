@@ -4,8 +4,6 @@ import streamlit as st
 import pandas as pd
 
 
-# Load data function with cache
-@st.cache_data
 def load_data(file):
     data = pd.read_csv(file)
     return data
@@ -92,5 +90,11 @@ def main():
         st.bar_chart(answer_counts.sort_index())
 
 
-if __name__ == "__main__":
-    main()
+    output_file = st.file_uploader("Upload your output CSV file", type=["csv"])
+
+    if output_file is not None:
+        data = load_data(output_file)
+
+        st.write("### Answer Distribution")
+        answer_counts = data['answer'].value_counts()
+        st.bar_chart(answer_counts.sort_index())
