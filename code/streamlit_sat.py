@@ -89,12 +89,12 @@ def main():
         answer_counts = data['problems'].apply(lambda x: ast.literal_eval(x)['answer']).value_counts()
         st.bar_chart(answer_counts.sort_index())
 
-
-    output_file = st.file_uploader("Upload your output CSV file", type=["csv"])
-
-    if output_file is not None:
-        data = load_data(output_file)
-
-        st.write("### Answer Distribution")
-        answer_counts = data['answer'].value_counts()
-        st.bar_chart(answer_counts.sort_index())
+    #
+    # output_file = st.file_uploader("Upload your output CSV file", type=["csv"])
+    #
+    # if output_file is not None:
+    #     data = load_data(output_file)
+    #
+    #     st.write("### Answer Distribution")
+    #     answer_counts = data['answer'].value_counts()
+    #     st.bar_chart(answer_counts.sort_index())
