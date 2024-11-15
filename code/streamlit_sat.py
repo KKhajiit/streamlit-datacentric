@@ -42,59 +42,58 @@ def plot_length_histogram(data, column_name, title, isDict=False, dictName=None)
 
 
 # Main Streamlit app
-def main():
-    st.title("Korean CSAT Language Section EDA")
+st.title("Korean CSAT Language Section EDA")
 
-    # File uploader for user-uploaded data
-    file = st.file_uploader("Upload your dataset CSV file", type=["csv"])
+# File uploader for user-uploaded data
+file = st.file_uploader("Upload your dataset CSV file", type=["csv"])
 
-    if file is not None:
-        # Load the uploaded data
-        data = load_data(file)
+if file is not None:
+    # Load the uploaded data
+    data = load_data(file)
 
-        st.write("### Dataset Preview")
-        st.dataframe(data.head())
+    st.write("### Dataset Preview")
+    st.dataframe(data.head())
 
-        # Basic dataset information
-        st.write("### Dataset Information")
-        st.write(f"Number of entries: {len(data)}")
-        st.write(f"Columns: {data.columns.tolist()}")
+    # Basic dataset information
+    st.write("### Dataset Information")
+    st.write(f"Number of entries: {len(data)}")
+    st.write(f"Columns: {data.columns.tolist()}")
 
-        # Display samples of each field
-        st.write("### Field Analysis")
+    # Display samples of each field
+    st.write("### Field Analysis")
 
-        # Display a sample paragraph
-        st.subheader("Sample Paragraph")
-        st.write(data['paragraph'].iloc[0])
+    # Display a sample paragraph
+    st.subheader("Sample Paragraph")
+    st.write(data['paragraph'].iloc[0])
 
-        # Display a sample problem with details
-        st.subheader("Sample Problem")
-        display_problem_details(data['problems'].iloc[0])
+    # Display a sample problem with details
+    st.subheader("Sample Problem")
+    display_problem_details(data['problems'].iloc[0])
 
-        # Display a sample 'question_plus' entry
-        st.subheader("Sample Question Plus")
-        st.write(data['question_plus'].iloc[0])
+    # Display a sample 'question_plus' entry
+    st.subheader("Sample Question Plus")
+    st.write(data['question_plus'].iloc[0])
 
-        # Additional statistics
-        st.write("### Additional Statistics")
+    # Additional statistics
+    st.write("### Additional Statistics")
 
-        # Plot length distributions for each field
-        plot_length_histogram(data, 'paragraph', 'Paragraph')
-        plot_length_histogram(data, 'problems', 'Question', True, 'question')
-        plot_length_histogram(data, 'problems', 'Choices', True, 'choices')
-        plot_length_histogram(data, 'question_plus', 'Question Plus')
+    # Plot length distributions for each field
+    plot_length_histogram(data, 'paragraph', 'Paragraph')
+    plot_length_histogram(data, 'problems', 'Question', True, 'question')
+    plot_length_histogram(data, 'problems', 'Choices', True, 'choices')
+    plot_length_histogram(data, 'question_plus', 'Question Plus')
 
-        # Answer count analysis
-        st.write("#### Answer Distribution")
-        answer_counts = data['problems'].apply(lambda x: ast.literal_eval(x)['answer']).value_counts()
-        st.bar_chart(answer_counts.sort_index())
+    # Answer count analysis
+    st.write("#### Answer Distribution")
+    answer_counts = data['problems'].apply(lambda x: ast.literal_eval(x)['answer']).value_counts()
+    st.bar_chart(answer_counts.sort_index())
 
-    #
-    # output_file = st.file_uploader("Upload your output CSV file", type=["csv"])
-    #
-    # if output_file is not None:
-    #     data = load_data(output_file)
-    #
-    #     st.write("### Answer Distribution")
-    #     answer_counts = data['answer'].value_counts()
-    #     st.bar_chart(answer_counts.sort_index())
+
+output_file = st.file_uploader("Upload your output CSV file", type=["csv"])
+
+if output_file is not None:
+    data = load_data(output_file)
+
+    st.write("### Answer Distribution")
+    answer_counts = data['answer'].value_counts()
+    st.bar_chart(answer_counts.sort_index())
