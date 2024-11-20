@@ -47,63 +47,110 @@ st.title("Korean CSAT Language Section EDA")
 # File uploader for user-uploaded data
 train_file = st.file_uploader("Upload your dataset CSV file", type=["csv"])
 
-if train_file is not None:
-    # Load the uploaded data
-    data = load_data(train_file)
-
-    st.write("### Dataset Preview")
-    st.dataframe(data.head())
-
-    # Basic dataset information
-    st.write("### Dataset Information")
-    st.write(f"Number of entries: {len(data)}")
-    st.write(f"Columns: {data.columns.tolist()}")
-
-    # Display samples of each field
-    st.write("### Field Analysis")
-
-    # Display a sample paragraph
-    st.subheader("Sample Paragraph")
-    st.write(data['paragraph'].iloc[0])
-
-    # Display a sample problem with details
-    st.subheader("Sample Problem")
-    display_problem_details(data['problems'].iloc[0])
-
-    # Display a sample 'question_plus' entry
-    st.subheader("Sample Question Plus")
-    st.write(data['question_plus'].iloc[0])
-
-    # Additional statistics
-    st.write("### Additional Statistics")
-
-    # Plot length distributions for each field
-    plot_length_histogram(data, 'paragraph', 'Paragraph')
-    plot_length_histogram(data, 'problems', 'Question', True, 'question')
-    plot_length_histogram(data, 'problems', 'Choices', True, 'choices')
-    plot_length_histogram(data, 'question_plus', 'Question Plus')
-
-    # Answer count analysis
-    st.write("#### Answer Distribution")
-    answer_counts = data['problems'].apply(lambda x: ast.literal_eval(x)['answer']).value_counts()
-    st.bar_chart(answer_counts.sort_index())
+# if train_file is not None:
+#     # Load the uploaded data
+#     train_df = load_data(train_file)
+#
+#     st.write("### Dataset Preview")
+#     st.dataframe(train_df.head())
+#
+#     # Basic dataset information
+#     st.write("### Dataset Information")
+#     st.write(f"Number of entries: {len(train_df)}")
+#     st.write(f"Columns: {train_df.columns.tolist()}")
+#
+#     # Display samples of each field
+#     st.write("### Field Analysis")
+#
+#     # Display a sample paragraph
+#     st.subheader("Sample Paragraph")
+#     st.write(train_df['paragraph'].iloc[0])
+#
+#     # Display a sample problem with details
+#     st.subheader("Sample Problem")
+#     display_problem_details(train_df['problems'].iloc[0])
+#
+#     # Display a sample 'question_plus' entry
+#     st.subheader("Sample Question Plus")
+#     st.write(train_df['question_plus'].iloc[0])
+#
+#     # Additional statistics
+#     st.write("### Additional Statistics")
+#
+#     # Plot length distributions for each field
+#     plot_length_histogram(train_df, 'paragraph', 'Paragraph')
+#     plot_length_histogram(train_df, 'problems', 'Question', True, 'question')
+#     plot_length_histogram(train_df, 'problems', 'Choices', True, 'choices')
+#     plot_length_histogram(train_df, 'question_plus', 'Question Plus')
+#
+#     # Answer count analysis
+#     st.write("#### Answer Distribution")
+#     answer_counts = train_df['problems'].apply(lambda x: ast.literal_eval(x)['answer']).value_counts()
+#     st.bar_chart(answer_counts.sort_index())
 
 
 output_files = st.file_uploader(
     "Upload your output CSV files (multiple allowed)", type=["csv"], accept_multiple_files=True
 )
 
-if output_files is not None:
-    for output_file in output_files:
-        data = pd.read_csv(output_file)
-        st.write(f"### Answer Distribution for {output_file.name}")
-        answer_counts = data['answer'].value_counts()
-        st.bar_chart(answer_counts.sort_index())
+# if output_files is not None:
+#     for output_file in output_files:
+#         data = pd.read_csv(output_file)
+#         st.write(f"### Answer Distribution for {output_file.name}")
+#         answer_counts = data['answer'].value_counts()
+#         st.bar_chart(answer_counts.sort_index())
 
 if train_file and output_files:
     # 파일 읽기
     train_df = pd.read_csv(train_file)
-    output_dfs = [pd.read_csv(file) for file in output_files]
+    # output_dfs = [pd.read_csv(file) for file in output_files]
+    output_dfs = []
+
+    st.write("### Dataset Preview")
+    st.dataframe(train_df.head())
+
+    # Basic dataset information
+    st.write("### Dataset Information")
+    st.write(f"Number of entries: {len(train_df)}")
+    st.write(f"Columns: {train_df.columns.tolist()}")
+
+    # Display samples of each field
+    st.write("### Field Analysis")
+
+    # Display a sample paragraph
+    st.subheader("Sample Paragraph")
+    st.write(train_df['paragraph'].iloc[0])
+
+    # Display a sample problem with details
+    st.subheader("Sample Problem")
+    display_problem_details(train_df['problems'].iloc[0])
+
+    # Display a sample 'question_plus' entry
+    st.subheader("Sample Question Plus")
+    st.write(train_df['question_plus'].iloc[0])
+
+    # Additional statistics
+    st.write("### Additional Statistics")
+
+    # Plot length distributions for each field
+    plot_length_histogram(train_df, 'paragraph', 'Paragraph')
+    plot_length_histogram(train_df, 'problems', 'Question', True, 'question')
+    plot_length_histogram(train_df, 'problems', 'Choices', True, 'choices')
+    plot_length_histogram(train_df, 'question_plus', 'Question Plus')
+
+    # Answer count analysis
+    st.write("#### Answer Distribution")
+    answer_counts = train_df['problems'].apply(lambda x: ast.literal_eval(x)['answer']).value_counts()
+    st.bar_chart(answer_counts.sort_index())
+
+
+    for output_file in output_files:
+        data = pd.read_csv(output_file)
+        output_dfs.append(data)
+        st.write(f"### Answer Distribution for {output_file.name}")
+        answer_counts = data['answer'].value_counts()
+        st.bar_chart(answer_counts.sort_index())
+
 
     # ID 기준으로 train_file에서 문제 정보 가져오기
     def get_problem_data(train_df, problem_id):
