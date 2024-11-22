@@ -48,7 +48,7 @@ def get_comparison_data(train_data, output_data_list):
 
         # 각 파일의 예측 값 비교
         predictions = [df[df["id"].astype(str) == problem_id]["answer"] for df in output_dfs]
-        statuses = [int(pred.astype(str) == record["answer"]) for pred in predictions]
+        statuses = [int(pred.astype(str) == record["answer"].astype(str)) for pred in predictions]
 
         if sum(statuses) == len(output_dfs):  # 모두 정답
             category = "Both Correct"
