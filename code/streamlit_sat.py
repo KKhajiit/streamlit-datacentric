@@ -17,7 +17,7 @@ class CSVData:
         if flatten_condition:
             self.data = self._flatten_json(self.data)
 
-    def _flatten_json(df):
+    def _flatten_json(self, df):
         records = []
         for _, row in df.iterrows():
             problems = literal_eval(row['problems'])
@@ -45,13 +45,10 @@ def get_comparison_data(train_data, output_data_list):
     output_dfs = [output_data.data for output_data in output_data_list]
     for problem_id in train_df["id"]:
         record = train_df[train_df["id"] == problem_id]
-        paragraph = record["paragraph"]
-        problems = record[""]
-        correct_answer = problems["answer"]
 
         # 각 파일의 예측 값 비교
-        predictions = [df[df["id"] == problem_id]["answer"] for df in output_dfs]
-        statuses = [int(pred == correct_answer) for pred in predictions]
+        predictions = [df[df["id"].astype(str) == problem_id]["answer"] for df in output_dfs]
+        statuses = [int(pred.astype(str) == record["answer"].astype(str)) for pred in predictions]
 
         if sum(statuses) == len(output_dfs):  # 모두 정답
             category = "Both Correct"
