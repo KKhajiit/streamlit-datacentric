@@ -17,7 +17,7 @@ class CSVData:
         if flatten_condition:
             self.data = self._flatten_json(self.data)
 
-    def _flatten_json(df):
+    def _flatten_json(self, df):
         records = []
         for _, row in df.iterrows():
             problems = literal_eval(row['problems'])
