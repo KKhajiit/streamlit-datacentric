@@ -47,8 +47,10 @@ def get_comparison_data(train_data, output_data_list):
         record = train_df[train_df["id"] == problem_id]
 
         # 각 파일의 예측 값 비교
-        predictions = [df[df["id"].astype(str) == problem_id]["answer"] for df in output_dfs]
-        statuses = [int(pred.astype(str) == record["answer"].astype(str)) for pred in predictions]
+        predictions = [df[df["id"] == problem_id]["answer"] for df in output_dfs]
+        if predictions[0].empty:
+            continue
+        statuses = [int(pred.values[0] == record["answer"].values[0]) for pred in predictions]
 
         if sum(statuses) == len(output_dfs):  # 모두 정답
             category = "Both Correct"
@@ -113,11 +115,11 @@ if train_data and len(output_data_list) > 0:
     # Main: 문제 정보 및 예측 값 표시
     if problem_id:
         problem_data = filtered_df[filtered_df["id"] == problem_id].iloc[0]
-        st.write(f"**Paragraph:** {problem_data['paragraph']}")
-        st.write(f"**Question:** {problem_data['question']}")
-        st.write(f"**Choices:** {problem_data['choices']}")
-        st.write(f"**Correct Answer:** {problem_data['correct_answer']}")
+        st.write(f"**Paragraph:** {problem_data['paragraph'].values[0]}")
+        st.write(f"**Question:** {problem_data['question'].values[0]}")
+        st.write(f"**Choices:** {problem_data['choices'].values[0]}")
+        st.write(f"**Correct Answer:** {problem_data['correct_answer'].values[0]}")
 
         st.write("### Predictions")
         for i, pred in enumerate(problem_data["predictions"]):
-            st.write(f"{output_data_list[i].filename}: {pred}")
+            st.write(f"**{output_data_list[i].filename}: {pred.values[0]}**")
