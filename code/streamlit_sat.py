@@ -152,30 +152,21 @@ if train_data or len(output_data_list) > 0:
             if problem_id:
                 problem_data = filtered_df.loc[problem_id]
 
-                # Paragraph 박스
-                st.markdown(f"""
-                    <div style='padding: 15px; border: 1px solid #000;'>{problem_data['paragraph']}</div>
-                """, unsafe_allow_html=True)
-
-                # Question (문제 번호와 함께 표시)
-                st.markdown(
-                    f"<br><span style='font-size: 20px; font-weight: bold;'>{problem_id}. </span> {problem_data['question']}",
-                    unsafe_allow_html=True)
+                # HTML 생성
+                # paragraph, problem id, question 출력
+                html_output = f"""
+                <div style='padding: 15px; border: 1px solid #000;'>{problem_data['paragraph']}</div>
+                <br><span style='font-size: 20px; font-weight: bold;'>{problem_id}. </span> {problem_data['question']}<br><br>
+                """
 
                 # Choices
                 for idx, choice in enumerate(problem_data['choices']):
                     choice_number = f"&#x2460;".replace('0', str(idx))  # ①, ②, ③ 등의 유니코드 원 사용
-                    if idx + 1 == problem_data["correct_answer"]:
-                        st.markdown(
-                            f"<div style='background-color:#FFFF00; display: inline-block; margin-bottom: 5px;'>{choice_number} {choice}</div>",
-                            unsafe_allow_html=True)
-                    else:
-                        st.markdown(
-                            f"<div style='display: inline-block; margin-bottom: 5px;'>{choice_number} {choice}</div>",
-                            unsafe_allow_html=True)
+                    background = "#FFFF00" if idx + 1 == problem_data["correct_answer"] else "none"
+                    html_output += f"<div style='background-color:{background}; display: inline-block; margin-bottom: 5px;'>{choice_number} {choice}</div>"
 
                 # 선택지와 테이블 사이에 간격 추가
-                st.markdown("<br><br>", unsafe_allow_html=True)
+                html_output += "<br><br>"
 
                 # 테이블 생성
                 table_html = "<table style='width:100%; border-collapse: collapse;'>"
@@ -183,14 +174,12 @@ if train_data or len(output_data_list) > 0:
 
                 # 문제별 예측 결과 표시
                 for i, pred in enumerate(problem_data["predictions"]):
-                    # 예측이 맞으면 강조
                     result = "✅" if pred == problem_data["correct_answer"] else "❌"
-
-                    # 각 예측을 테이블로 추가
                     table_html += f"<tr><td style='padding: 10px; border: 1px solid #ddd; font-weight: bold;'>{output_data_list[i].file_name}</td>"
                     table_html += f"<td style='padding: 10px; border: 1px solid #ddd;'>{pred}</td>"
                     table_html += f"<td style='padding: 10px; border: 1px solid #ddd; color: {'green' if pred == problem_data['correct_answer'] else 'red'}'>{result}</td></tr>"
 
                 table_html += "</table>"
-                # 테이블을 Streamlit에서 출력
-                st.markdown(table_html, unsafe_allow_html=True)
+
+                # Streamlit에서 한 번에 출력
+                st.markdown(html_output + table_html, unsafe_allow_html=True)
