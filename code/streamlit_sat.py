@@ -131,13 +131,22 @@ if train_data or len(output_data_list) > 0:
         if train_data and len(output_data_list) > 0:
             comparison_df = get_comparison_data(train_data.to_dict(),
                                                 [output_data.to_dict() for output_data in output_data_list])
+            if "output_data_length" not in st.session_state:
+                st.session_state.output_data_length = len(output_data_list)
 
             # Sidebar: Filter options
             category_filter_options = comparison_df["category"].unique()
             category_filter = st.sidebar.selectbox("Filter by category", category_filter_options)
 
-            filtered_df = comparison_df[comparison_df["category"] == category_filter]
-            filtered_df.loc[:, "id"] = filtered_df["id"].apply(lambda x: x.split("-")[-1])
+            # comparison_df가 바뀌었을 때만 filtered_df를 새로 갱신
+            if "filtered_df" not in st.session_state or st.session_state.output_data_length != len(output_data_list):
+                filtered_df = comparison_df[comparison_df["category"] == category_filter]
+                filtered_df.loc[:, "id"] = filtered_df["id"].apply(lambda x: x.split("-")[-1])
+                st.session_state.filtered_df = filtered_df
+                st.session_state.comparison_df = comparison_df  # comparison_df를 세션 상태에 저장하여 변경 여부 추적
+            else:
+                # comparison_df가 바뀌지 않으면 세션 상태에서 가져오기
+                filtered_df = st.session_state.filtered_df
 
             problem_id = st.sidebar.selectbox("Select a problem ID", filtered_df["id"])
 
