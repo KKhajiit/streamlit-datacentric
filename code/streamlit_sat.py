@@ -138,19 +138,26 @@ if train_data or len(output_data_list) > 0:
             category_filter_options = comparison_df["category"].unique()
             category_filter = st.sidebar.selectbox("Filter by category", category_filter_options)
 
-            # output_data가 바뀌었을 때만 filtered_df를 새로 갱신
-            if "filtered_df" not in st.session_state or st.session_state.output_data_length != len(output_data_list):
-                filtered_df = comparison_df[comparison_df["category"] == category_filter]
-                filtered_df.loc[:, "id"] = filtered_df["id"].apply(lambda x: x.split("-")[-1])
-                filtered_df.set_index("id", inplace=True)
-                st.session_state.filtered_df = filtered_df
-            else:
-                filtered_df = st.session_state.filtered_df
+            # 모든 category_filter 값에 대해 미리 데이터를 필터링
+            if "precomputed_filters" not in st.session_state or st.session_state.output_data_length != len(
+                    output_data_list):
+                st.session_state.output_data_length = len(output_data_list)
+
+                # 필터별로 필터링된 데이터를 미리 준비
+                comparison_df["id"] = comparison_df["id"].apply(lambda x: x.split("-")[-1])
+                comparison_df.set_index("id", inplace=True)
+                st.session_state.precomputed_filters = {
+                    category: comparison_df[comparison_df["category"] == category]
+                    for category in category_filter_options
+                }
+            # 사용자가 선택한 필터에 해당하는 데이터 가져오기
+            filtered_df = st.session_state.precomputed_filters[category_filter]
 
             problem_id = st.sidebar.selectbox("Select a problem ID", filtered_df.index)
 
             if problem_id:
                 problem_data = filtered_df.loc[problem_id]
+                st.write(f"### Answer: {problem_data['correct_answer']}")
 
                 # HTML 생성
                 # paragraph, problem id, question 출력
@@ -162,8 +169,9 @@ if train_data or len(output_data_list) > 0:
                 # Choices
                 for idx, choice in enumerate(problem_data['choices']):
                     choice_number = f"&#x2460;".replace('0', str(idx))  # ①, ②, ③ 등의 유니코드 원 사용
-                    background = "#FFFF00" if idx + 1 == problem_data["correct_answer"] else "none"
+                    background = "#FFFF00" if (idx + 1) == problem_data["correct_answer"] else "transparent"
                     html_output += f"<div style='background-color:{background}; display: inline-block; margin-bottom: 5px;'>{choice_number} {choice}</div>"
+                    html_output += "<br>"
 
                 # 선택지와 테이블 사이에 간격 추가
                 html_output += "<br><br>"
