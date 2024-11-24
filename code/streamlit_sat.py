@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
+import html
 from ast import literal_eval
+
 
 class CSVData:
     def __init__(self, file, flatten_condition=False):
@@ -36,6 +38,28 @@ def display_answer_distribution(title, df):
     answer_counts = df['answer'].value_counts()
     answer_counts = answer_counts.reindex(range(1, 6), fill_value=0)
     st.bar_chart(answer_counts.sort_index())
+
+
+def write_styled_text(text, bold=False, color=None, background_color=None):
+    """
+    HTML 스타일을 적용한 텍스트를 반환하는 함수
+    Args:
+        text (str): 표시할 텍스트
+        bold (bool): 굵게 표시 여부
+        color (str): 글자 색상
+        background_color (str): 배경 색상
+    Returns:
+        str: HTML 스타일이 적용된 텍스트
+    """
+    style = ""
+    if bold:
+        style += "font-weight: bold; "
+    if color:
+        style += f"color: {color}; "
+    if background_color:
+        style += f"background-color: {background_color}; "
+
+    st.markdown(f"<span style='{style}'>{text}</span>", unsafe_allow_html=True)
 
 
 def get_comparison_data(train_data, output_data_list):
@@ -75,6 +99,7 @@ def get_comparison_data(train_data, output_data_list):
             "predictions": [pred.values[0] for pred in predictions],
         })
     return pd.DataFrame(results)
+
 
 tabs = st.tabs(["Upload Files", "Answer Distribution", "Output Comparison"])
 
@@ -119,16 +144,53 @@ if train_data or len(output_data_list) > 0:
             category_filter = st.sidebar.selectbox("Filter by category", category_filter_options)
 
             filtered_df = comparison_df[comparison_df["category"] == category_filter]
+            filtered_df.loc[:, "id"] = filtered_df["id"].apply(lambda x: x.split("-")[-1])
 
             problem_id = st.sidebar.selectbox("Select a problem ID", filtered_df["id"])
 
             if problem_id:
                 problem_data = filtered_df[filtered_df["id"] == problem_id].iloc[0]
-                st.write(f"**Paragraph:** {problem_data['paragraph']}")
-                st.write(f"**Question:** {problem_data['question']}")
-                st.write(f"**Choices:** {problem_data['choices']}")
-                st.write(f"**Correct Answer:** {problem_data['correct_answer']}")
 
-                st.write("### Predictions")
+                # Paragraph 박스
+                st.markdown(f"""
+                    <div style='padding: 15px; border: 1px solid #000;'>{problem_data['paragraph']}</div>
+                """, unsafe_allow_html=True)
+
+                # Question (문제 번호와 함께 표시)
+                st.markdown(
+                    f"<br><span style='font-size: 20px; font-weight: bold;'>{problem_id}. </span> {problem_data['question']}",
+                    unsafe_allow_html=True)
+
+                # Choices
+                for idx, choice in enumerate(problem_data['choices']):
+                    choice_number = f"&#x2460;".replace('0', str(idx))  # ①, ②, ③ 등의 유니코드 원 사용
+                    if idx + 1 == problem_data["correct_answer"]:
+                        st.markdown(
+                            f"<div style='background-color:#FFFF00; display: inline-block; margin-bottom: 5px;'>{choice_number} {choice}</div>",
+                            unsafe_allow_html=True)
+                    else:
+                        st.markdown(
+                            f"<div style='display: inline-block; margin-bottom: 5px;'>{choice_number} {choice}</div>",
+                            unsafe_allow_html=True)
+
+                # 선택지와 테이블 사이에 간격 추가
+                st.markdown("<br><br>", unsafe_allow_html=True)
+
+                # 테이블 생성
+                table_html = "<table style='width:100%; border-collapse: collapse;'>"
+                table_html += "<tr><th style='padding: 10px; text-align: left;'>Output File</th><th style='padding: 10px; text-align: left;'>Prediction</th><th style='padding: 10px; text-align: left;'>Result</th></tr>"
+
+                # 문제별 예측 결과 표시
                 for i, pred in enumerate(problem_data["predictions"]):
-                    st.write(f"**{output_data_list[i].filename}: {pred}**")
+                    # 예측이 맞으면 강조
+                    result = "✅" if pred == problem_data["correct_answer"] else "❌"
+
+                    # 각 예측을 테이블로 추가
+                    table_html += f"<tr><td style='padding: 10px; border: 1px solid #ddd; font-weight: bold;'>{output_data_list[i].filename}</td>"
+                    table_html += f"<td style='padding: 10px; border: 1px solid #ddd;'>{pred}</td>"
+                    table_html += f"<td style='padding: 10px; border: 1px solid #ddd; color: {'green' if pred == problem_data['correct_answer'] else 'red'}'>{result}</td></tr>"
+
+                table_html += "</table>"
+                print(table_html)
+                # 테이블을 Streamlit에서 출력
+                st.markdown(table_html, unsafe_allow_html=True)
