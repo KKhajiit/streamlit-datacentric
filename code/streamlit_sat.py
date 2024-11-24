@@ -12,8 +12,8 @@ class CSVData:
             file: Uploaded file object (e.g., from Streamlit file uploader).
             flatten_condition: Whether to apply flatten_json to csv file
         """
-        self.filename = (file.name).replace(".csv", "")  # File name
-        self.data = pd.read_csv(file)  # Data loaded as DataFrame
+        self.file_name = (file.name).replace(".csv", "")  # File name
+        self.data = load_data(file)  # Data loaded as DataFrame
         if flatten_condition:
             self.data = self._flatten_json(self.data)
 
@@ -32,6 +32,18 @@ class CSVData:
             records.append(record)
         return pd.DataFrame(records)
 
+    def to_dict(self):
+        return {
+            "file_name": self.file_name,
+            "data": self.data.to_dict(orient="records")
+        }
+
+
+@st.cache_data
+def load_data(file):
+    df = pd.read_csv(file)
+    return df
+
 
 def display_answer_distribution(title, df):
     st.write(f"#### {title}")
@@ -40,33 +52,13 @@ def display_answer_distribution(title, df):
     st.bar_chart(answer_counts.sort_index())
 
 
-def write_styled_text(text, bold=False, color=None, background_color=None):
-    """
-    HTML 스타일을 적용한 텍스트를 반환하는 함수
-    Args:
-        text (str): 표시할 텍스트
-        bold (bool): 굵게 표시 여부
-        color (str): 글자 색상
-        background_color (str): 배경 색상
-    Returns:
-        str: HTML 스타일이 적용된 텍스트
-    """
-    style = ""
-    if bold:
-        style += "font-weight: bold; "
-    if color:
-        style += f"color: {color}; "
-    if background_color:
-        style += f"background-color: {background_color}; "
-
-    st.markdown(f"<span style='{style}'>{text}</span>", unsafe_allow_html=True)
-
-
+@st.cache_data
 def get_comparison_data(train_data, output_data_list):
+    train_df = pd.DataFrame(train_data["data"])
+    output_dfs = [pd.DataFrame(output_data["data"]) for output_data in output_data_list]
+    output_file_names = [output_data["file_name"] for output_data in output_data_list]
+
     results = []
-    train_df = train_data.data
-    output_dfs = [output_data.data for output_data in output_data_list]
-    output_file_names = [output_data.filename for output_data in output_data_list]
 
     for problem_id in train_df["id"]:
         record = train_df[train_df["id"] == problem_id]
@@ -125,19 +117,20 @@ if train_data or len(output_data_list) > 0:
     with tabs[1]:
         if train_data:
             st.write("### Train Data Answer Distribution")
-            display_answer_distribution(train_data.filename, train_data.data)
+            display_answer_distribution(train_data.file_name, train_data.data)
 
         st.write("---")
 
         if len(output_data_list) > 0:
             st.write(f"### Output Data Answer Distribution")
             for output_data in output_data_list:
-                display_answer_distribution(output_data.filename, output_data.data)
+                display_answer_distribution(output_data.file_name, output_data.data)
 
     # Tab 2: Output Comparison
     with tabs[2]:
         if train_data and len(output_data_list) > 0:
-            comparison_df = get_comparison_data(train_data, output_data_list)
+            comparison_df = get_comparison_data(train_data.to_dict(),
+                                                [output_data.to_dict() for output_data in output_data_list])
 
             # Sidebar: Filter options
             category_filter_options = comparison_df["category"].unique()
@@ -186,11 +179,10 @@ if train_data or len(output_data_list) > 0:
                     result = "✅" if pred == problem_data["correct_answer"] else "❌"
 
                     # 각 예측을 테이블로 추가
-                    table_html += f"<tr><td style='padding: 10px; border: 1px solid #ddd; font-weight: bold;'>{output_data_list[i].filename}</td>"
+                    table_html += f"<tr><td style='padding: 10px; border: 1px solid #ddd; font-weight: bold;'>{output_data_list[i].file_name}</td>"
                     table_html += f"<td style='padding: 10px; border: 1px solid #ddd;'>{pred}</td>"
                     table_html += f"<td style='padding: 10px; border: 1px solid #ddd; color: {'green' if pred == problem_data['correct_answer'] else 'red'}'>{result}</td></tr>"
 
                 table_html += "</table>"
-                print(table_html)
                 # 테이블을 Streamlit에서 출력
                 st.markdown(table_html, unsafe_allow_html=True)
