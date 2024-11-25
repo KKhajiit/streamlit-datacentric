@@ -157,7 +157,6 @@ if train_data or len(output_data_list) > 0:
 
             if problem_id:
                 problem_data = filtered_df.loc[problem_id]
-                st.write(f"### Answer: {problem_data['correct_answer']}")
 
                 # HTML 생성
                 # paragraph, problem id, question 출력
