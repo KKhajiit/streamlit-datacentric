@@ -1,6 +1,8 @@
+import html
 import streamlit as st
 import pandas as pd
-import html
+
+from matplotlib import pyplot as plt
 from ast import literal_eval
 
 
@@ -45,15 +47,20 @@ def load_data(file):
     return df
 
 def display_length_distribution(df, column):
-    st.write(f"#### {column} length")
-    st.bar_chart(df[column].apply(len).value_counts().sort_index())
+    lengths = df[column].apply(len)
+
+    fig, ax = plt.subplots()
+    ax.hist(lengths, bins=20, color='skyblue', edgecolor='black')
+    ax.set_title(f'{column} length distribution')
+    ax.set_xlabel('Length')
+    ax.set_ylabel('Frequency')
+    st.pyplot(fig)
 
 def display_answer_distribution(title, df):
     st.write(f"#### {title}")
     answer_counts = df['answer'].value_counts()
     answer_counts = answer_counts.reindex(range(1, 6), fill_value=0)
     st.bar_chart(answer_counts.sort_index())
-
 
 @st.cache_data
 def get_comparison_data(train_data, output_data_list):
@@ -108,7 +115,6 @@ with tabs[0]:
         st.write("### EDA")
         display_length_distribution(train_data.data, "paragraph")
         display_length_distribution(train_data.data, "question")
-        display_length_distribution(train_data.data, "choices")
 
 
     output_files = st.file_uploader(
