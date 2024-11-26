@@ -44,6 +44,9 @@ def load_data(file):
     df = pd.read_csv(file)
     return df
 
+def display_length_distribution(df, column):
+    st.write(f"#### {column} length")
+    st.bar_chart(df[column].apply(len).value_counts().sort_index())
 
 def display_answer_distribution(title, df):
     st.write(f"#### {title}")
@@ -101,6 +104,12 @@ with tabs[0]:
     train_data = None
     if train_file:
         train_data = CSVData(train_file, flatten_condition=True)
+
+        st.write("### EDA")
+        display_length_distribution(train_data.data, "paragraph")
+        display_length_distribution(train_data.data, "question")
+        display_length_distribution(train_data.data, "choices")
+
 
     output_files = st.file_uploader(
         "Upload your output CSV files (multiple allowed)", type=["csv"], accept_multiple_files=True
